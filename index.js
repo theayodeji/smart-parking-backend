@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Configure CORS to allow credentials and specify the frontend origin
 const corsOptions = {
-  origin: "https://smartparking-592.netlify.app", // Replace with your frontend's URL
+  origin: process.env.CORS_ORIGIN || "https://smartparking-592.netlify.app", // Replace with your frontend's URL
   credentials: true, // Allow cookies to be sent
 };
 app.use(cors(corsOptions));
