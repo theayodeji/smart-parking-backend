@@ -8,8 +8,7 @@ export const generateAuthToken = (userKey, email, res) => {
     res.cookie("token", token, {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || 'localhost', // Set your domain here
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production
     });
 
