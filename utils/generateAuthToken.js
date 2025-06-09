@@ -9,7 +9,7 @@ export const generateAuthToken = (userKey, email, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
         sameSite: 'none',
-        secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production
+        secure: true, // Requires HTTPS in production
     });
 
     return token;
