@@ -98,7 +98,10 @@ export const checkAuth = (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  // Clear the authentication cookie to log out the user
-  res.clearCookie("token");
+  res.clearCookie("token", {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+  secure: process.env.NODE_ENV === 'production',
+});
   res.status(200).json({ message: "Logged out successfully" });
 };
