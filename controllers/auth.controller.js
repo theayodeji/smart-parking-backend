@@ -28,7 +28,8 @@ export const registerUser = async (req, res) => {
     await newUserRef.set({
       email,
       password: hashedPassword,
-      createdAt: new Date().toISOString(), // Store the creation timestamp
+      createdAt: new Date().toISOString(),
+      lastReservedAt: "none" 
     });
 
     // Generate a unique key for the user and issue an authentication token
