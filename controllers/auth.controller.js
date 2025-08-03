@@ -106,3 +106,70 @@ export const logoutUser = (req, res) => {
 });
   res.status(200).json({ message: "Logged out successfully" });
 };
+
+function sanitizeEmail(email) {
+  return email.replace(/[.#$\[\]]/g, ',');
+}
+
+export const registerAdmin = async (req, res) => {
+  const { email, password } = req.body;
+
+  const db = admin.database();
+  const ref = db.ref("admins");
+
+  // Check if a user with the same email already exists in the database
+  const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
+  if (snapshot.val()) {
+    return res.status(400).json({ message: "Admin account with that email already exists" });
+  }
+
+  // Hash the password before storing it for security
+  const hashedPassword = bcrypt.hashSync(password, 8);
+
+  // Store admin using sanitized email as the key
+  const safeEmail = sanitizeEmail(email);
+  await ref.child(safeEmail).set({
+    email,
+    password: hashedPassword,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Use email as userKey for token
+  generateAuthToken(email, email, res);
+
+  res.status(201).json({ message: "Admin registered successfully" });
+}
+
+export const adminLogin = async (req, res) => {
+  const safeEmail = sanitizeEmail(req.body.email);
+  const { email, password } = req.body;
+
+  // Check if the user is in the admin list
+  const adminsRef = admin.database().ref("admins");
+  const adminsSnap = await adminsRef.once("value");
+  const admins = adminsSnap.val();
+  if (!admins || !admins[safeEmail]) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Check the password
+  const hashedPassword = admins[safeEmail].password;
+  const passwordMatch = await bcrypt.compare(password, hashedPassword);
+  if (!passwordMatch) {
+    return res.status(401).json({ message: "Invalid password" });
+  }
+
+  // Issue an authentication token for the admin
+  generateAuthToken(email, email, res);
+
+  res.json({ user: { id: email, email } });
+};
+
+export const adminLogout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+    secure: process.env.NODE_ENV === 'production',
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+};

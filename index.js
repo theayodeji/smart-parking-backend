@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
+app.use("/admin", adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚗💨 Server is running on port ${PORT}`);

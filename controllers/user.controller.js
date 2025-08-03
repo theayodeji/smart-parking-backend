@@ -109,3 +109,24 @@ export const cancelReservation = async (req, res) => {
         res.status(500).json({ message: 'Error canceling reservation', error: error.message });
     }
 };
+
+export const fetchLogs = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const db = admin.database();
+        const ref = db.ref('parking_logs');
+        const snapshot = await ref.once('value');
+        const data = snapshot.val();
+        // Convert to array, newest first
+        const logsArr = data ? Object.entries(data)
+            .map(([id, log]) => ({ id, ...log }))
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
+        const total = logsArr.length;
+        const start = (page - 1) * limit;
+        const paginated = logsArr.slice(start, start + limit);
+        res.json({ logs: paginated, total });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching logs', error: error.message });
+    }
+};
